@@ -1,39 +1,35 @@
-##Method Class
-public class genericMethodClass {
-    public static Map<String, List<SObject>> mapToField(List<SObject> objList, String fieldName){
-        Map<String, List<SObject>> objFieldMap = new Map<String, List<SObject>>();
-        
-        for(SObject obj : objList){
-            //get fieldName as key using API name
-            String key = String.valueOf(obj.get(fieldName));
+public class genericSObjectGroupingbatch implements Database.Batchable<SObject> {
+	public String fieldName;
+    public Map<String, List<SObject>> objFieldMap = new Map<String, List<SObject>>();
+    //constructor to initialize batch
+    public genericSObjectgroupingbatch(String fieldName){
+        this.fieldName = fieldName;
+    }
+    
+    public Database.QueryLocator start(Database.BatchableContext dbc){
+        //Dynamic query
+        String query = 'SELECT ' + fieldName + ', Id FROM ' + getObjectType();
+    	
+        return Database.getQueryLocator(query);
+    }
+    public void execute(Database.BatchableContext dbc, List<SObject> scope) {
+        for(SObject record : scope) {
+            String fieldValue = String.valueOf(record.get(fieldName));
             
-            //If map doesn't already contain key, make new list 
-            if(!objFieldMap.containsKey(key)){
-                objFieldMap.put(key, new List<SObject>());
+            if(!objFieldMap.containsKey(fieldValue)) {
+                objFieldMap.put(fieldValue, new List<SObject>());
             }
-            objFieldMap.get(key).add(obj);
-            
+            objFieldMap.get(fieldValue).add(record);
         }
-        return objFieldMap;
+    }
+  	public void finish(Database.BatchableContext bc) {
+        System.debug(objFieldMap);
+    }
+    //Method to get SOject type for the dynamic query
+    public String getObjectType(){
+        if(objFieldMap.isEmpty()){
+            return '';
+        }
+        return String.valueOf(objFieldMap.values()[0][0].getSObjectType());
     }
 }
-
-##Executable Class
-public class genericExample {
-    public static void executeGeneric(){
-        List<Account> accList = [SELECT Name, Industry FROM Account];
-    
-    	Map<String, List<SObject>> accountIndustryMap = genericMethodClass.mapToField(accList, 'Industry');
-    
-    	for(String industry : accountIndustryMap.keySet()) {
-    		List<SObject> industryAccounts = accountIndustryMap.get(industry);
-    		for(SObject account : industryAccounts) {
-        		System.debug('Account Name: ' + account.get('Name') +', Industry: '+ industry);
-    		}
-    	}
-    }
-	
-}
-
-##To execute in anonymus window
-genericExample.executeGeneric();
