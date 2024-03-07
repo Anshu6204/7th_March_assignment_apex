@@ -33,3 +33,17 @@ public class genericSObjectGroupingbatch implements Database.Batchable<SObject> 
         return String.valueOf(objFieldMap.values()[0][0].getSObjectType());
     }
 }
+
+##Executinh the batch class
+public class genericExample {
+    public static void executeGenericBatch(){
+        String fieldName = 'Industry';
+        genericSObjectbatch Batchable = new genericSObjectbatch(fieldName);
+        
+        String jobId = System.scheduleBatch(batchable, 'ObjField Grouping Batch Job', 200 );
+        System.debug('jobId');
+    
+    	
+    	}
+    }
+	
