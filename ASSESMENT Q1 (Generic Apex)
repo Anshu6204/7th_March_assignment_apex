@@ -1,3 +1,4 @@
+##Method Class
 public class genericMethodClass {
     public static Map<String, List<SObject>> mapToField(List<SObject> objList, String fieldName){
         Map<String, List<SObject>> objFieldMap = new Map<String, List<SObject>>();
@@ -16,3 +17,23 @@ public class genericMethodClass {
         return objFieldMap;
     }
 }
+
+##Executable Class
+public class genericExample {
+    public static void executeGeneric(){
+        List<Account> accList = [SELECT Name, Industry FROM Account];
+    
+    	Map<String, List<SObject>> accountIndustryMap = genericMethodClass.mapToField(accList, 'Industry');
+    
+    	for(String industry : accountIndustryMap.keySet()) {
+    		List<SObject> industryAccounts = accountIndustryMap.get(industry);
+    		for(SObject account : industryAccounts) {
+        		System.debug('Account Name: ' + account.get('Name') +', Industry: '+ industry);
+    		}
+    	}
+    }
+	
+}
+
+##To execute in anonymus window
+genericExample.executeGeneric();
