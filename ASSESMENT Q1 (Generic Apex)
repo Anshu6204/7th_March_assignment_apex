@@ -1,0 +1,18 @@
+public class genericMethodClass {
+    public static Map<String, List<SObject>> mapToField(List<SObject> objList, String fieldName){
+        Map<String, List<SObject>> objFieldMap = new Map<String, List<SObject>>();
+        
+        for(SObject obj : objList){
+            //get fieldName as key using API name
+            String key = String.valueOf(obj.get(fieldName));
+            
+            //If map doesn't already contain key, make new list 
+            if(!objFieldMap.containsKey(key)){
+                objFieldMap.put(key, new List<SObject>());
+            }
+            objFieldMap.get(key).add(obj);
+            
+        }
+        return objFieldMap;
+    }
+}
