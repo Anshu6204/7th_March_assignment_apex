@@ -1,0 +1,29 @@
+public class generateServicingOpportunity implements Schedulable {
+    public void execute(SchedulableContext sc){
+        Date sixMonthsBeforeDate = Date.today().addMonths(-6);
+        
+        List<Opportunity> closedWonOppList = [SELECT Id, Name, StageName, CloseDate FROM Opportunity WHERE StageName = 'Closed Won' AND CloseDate <= :sixMonthsBeforeDate];
+        
+        List<Opportunity> newServicingOppList = new List<Opportunity>();
+        
+        for(Opportunity opp : closedWonOppList){
+            Opportunity newServicingOpp = new Opportunity();
+            newServicingOpp.RecordTypeId = '0125j000000jF0TAAU';
+            newServicingOpp.Name = 'Service for '+ opp.Name;
+            newServicingOpp.CloseDate = Date.today().addDays(30);
+            
+            newServicingOppList.add(newServicingOpp);
+        }
+        insert newServicingOppList;
+    }
+    
+    public static void scheduleJob(){
+        String jobName = 'generateServicingOpportunityJob';
+        
+        String cronExp = '0 0 0 1 * ?';
+        System.schedule(jobName, cronExp, new generateServicingOpportunity());
+    }
+}
+
+##To run the code in Anonymus Window
+  generateServicingOpportunity.scheduleJob();
